@@ -49,17 +49,27 @@ def get_db():
 
 @app.get("/livros")
 def listar_livros(db=Depends(get_db)):
-    livros = db.query(Livro.titulo, Livro.preco).all()
-    return livros
-
+    livros_tuplas = db.query(Livro.titulo, Livro.preco).all()
+    
+    # Converte tuplas para dicionários
     livros_dict = [
-        {"titulo": titulo, "preco": preco}
+        {"titulo": titulo, "preco": float(preco) if preco else None}
         for titulo, preco in livros_tuplas
     ]
+    
+    return livros_dict
 
 @app.get("/livro/{nome}")
 def get_livro(nome: str, db=Depends(get_db)):
     livro = db.query(Livro).filter(Livro.titulo == nome).first()
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
-    return livro
+    
+    # Converte o objeto para dicionário
+    return {
+        "titulo": livro.titulo,
+        "preco": float(livro.preco) if livro.preco else None,
+        "disponibilidade": livro.disponibilidade,
+        "avaliacao": float(livro.avaliacao) if livro.avaliacao else None,
+        "pagina": float(livro.pagina) if livro.pagina else None
+    }
