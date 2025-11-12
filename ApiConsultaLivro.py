@@ -52,6 +52,11 @@ def listar_livros(db=Depends(get_db)):
     livros = db.query(Livro.titulo, Livro.preco).all()
     return livros
 
+    livros_dict = [
+        {"titulo": titulo, "preco": preco}
+        for titulo, preco in livros_tuplas
+    ]
+
 @app.get("/livro/{nome}")
 def get_livro(nome: str, db=Depends(get_db)):
     livro = db.query(Livro).filter(Livro.titulo == nome).first()
